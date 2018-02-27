@@ -1,2 +1,4 @@
+[![license](http://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/karsion/FrameAnimationSystem/master/LICENSE.TXT)
+
 # FrameAnimationSystem
-A Frame Animation System for Unity3D.
+A frame animation system for Unity3D.
