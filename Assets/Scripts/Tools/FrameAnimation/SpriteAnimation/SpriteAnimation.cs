@@ -36,15 +36,8 @@ namespace UnrealM
         //自动播放
         public bool autoPlay = true;
 
-        //public float FPS = 12;
         public bool isHiddenAtAwake;
 
-        //循环模式
-        //public enum FrameAnimation.LoopType { Once, Loop, PingPong };
-        //public FrameAnimation.LoopType loopType = FrameAnimation.LoopType.Loop;
-        //播放方向
-        //public enum PlayOrder { Forward, Backwards };
-        //public FrameAnimation.PlayOrder playOrder;
         //播放结束模式
         public enum EndMode
         {
@@ -60,7 +53,6 @@ namespace UnrealM
         [HideInInspector]
         public int nCurClipIndex = 0;
 
-        //public int nCurFrame = 0;
         public SpriteAnimationClip clips;
 
         public bool isPlaying { get { return frameAnimation.isPlaying; } }
@@ -95,10 +87,6 @@ namespace UnrealM
             //停止当前的动画
             frameAnimation.iFrameUpdater = this;
             frameAnimation.Stop();
-
-            //frameAnimation.FPS = FPS;
-            //frameAnimation.loopType = loopType;
-            //frameAnimation.playOrder = playOrder;
             frameAnimation.nLength = curSprites.Length;
             frameAnimation.Play();
         }

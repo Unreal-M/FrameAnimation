@@ -64,7 +64,7 @@ namespace UnrealM
         public LoopType loopType = LoopType.Loop;
 
         //播放方向
-        public PlayOrder playOrder;
+        public PlayOrder playOrder = PlayOrder.Forward;
 
         [NonSerialized]
         public int nLength = 0;
@@ -76,6 +76,9 @@ namespace UnrealM
 
         //循环更新函数
         private Action<FrameAnimation> loopTypeFun;
+#if !DOTween
+        private ActionSequence timer;
+#endif
 
         public int nCurFrame { get; private set; }
         public bool isPlaying { get; private set; }
@@ -85,11 +88,11 @@ namespace UnrealM
         {
             isPlaying = false;
 #if DOTween
-        DOTween.Kill(this);
+            DOTween.Kill(this);
 #else
-            if (iFrameUpdater != null)
+            if (timer != null)
             {
-                iFrameUpdater.StopSequence();
+                timer.Stop();
             }
 #endif
         }
@@ -133,15 +136,15 @@ namespace UnrealM
 
             float interval = 1/FPS;
             nCurFrame = nStartFrame;
+            isPlaying = true;
 
-            //这里使用了ActionSequenceSystem作为Timer，也可以使用DOTween的Sequence（小心GC），当然您也可以使用您的Timer
+            //开启定时器
+            //这里使用了ActionSequenceSystem作为Timer，也可以使用DOTween的Sequence，当然您也可以使用您的Timer
 #if DOTween
             DOTween.Sequence().SetId(this).SetRecyclable().AppendInterval(interval).AppendCallback(UpdateFrame).SetLoops(-1);
 #else
-            iFrameUpdater.Looper(interval, -1, false, UpdateFrame);
+            timer = ActionSequenceSystem.Looper(interval, -1, false, UpdateFrame);
 #endif
-
-            isPlaying = true;
         }
 
         private void UpdateFrame()
