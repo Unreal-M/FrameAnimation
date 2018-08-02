@@ -1,39 +1,12 @@
-// /****************************************************************************
+Ôªø// /****************************************************************************
 //  * Copyright (c) 2018 ZhongShan KPP Technology Co
-//  * Copyright (c) 2018 Karsion
-//  * 
-//  * https://github.com/karsion
-//  * Date: 2018-02-27 11:14
-//  *
-//  * Permission is hereby granted, free of charge, to any person obtaining a copy
-//  * of this software and associated documentation files (the "Software"), to deal
-//  * in the Software without restriction, including without limitation the rights
-//  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  * copies of the Software, and to permit persons to whom the Software is
-//  * furnished to do so, subject to the following conditions:
-//  * 
-//  * The above copyright notice and this permission notice shall be included in
-//  * all copies or substantial portions of the Software.
-//  * 
-//  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  * THE SOFTWARE.
+//  * Date: 2018-07-28 16:30
 //  ****************************************************************************/
 
 using System;
-
-//#define DOTween
-#if DOTween
-using DG.Tweening;
-#endif
-
 namespace UnrealM
 {
-    //÷°∏¸–¬Ω”ø⁄
+    //Â∏ßÊõ¥Êñ∞Êé•Âè£
     public interface IFrameUpdater
     {
         void OnFrame(int frame);
@@ -41,9 +14,9 @@ namespace UnrealM
     }
 
     [Serializable]
-    public class FrameAnimation
+    public class FrameAnimation : ActionSequenceHandle
     {
-        //—≠ª∑¿‡–Õ
+        //Âæ™ÁéØÁ±ªÂûã
         public enum LoopType
         {
             Once,
@@ -51,7 +24,7 @@ namespace UnrealM
             PingPong
         };
 
-        //≤•∑≈∑ΩœÚ
+        //Êí≠ÊîæÊñπÂêë
         public enum PlayOrder
         {
             Forward,
@@ -60,10 +33,10 @@ namespace UnrealM
 
         public float FPS = 12;
 
-        //—≠ª∑¿‡–Õ
+        //Âæ™ÁéØÁ±ªÂûã
         public LoopType loopType = LoopType.Loop;
 
-        //≤•∑≈∑ΩœÚ
+        //Êí≠ÊîæÊñπÂêë
         public PlayOrder playOrder = PlayOrder.Forward;
 
         [NonSerialized]
@@ -71,15 +44,11 @@ namespace UnrealM
 
         private int nSign = 1;
 
-        //∏¸–¬Ω”ø⁄
+        //Êõ¥Êñ∞Êé•Âè£
         public IFrameUpdater iFrameUpdater;
 
-        //—≠ª∑∏¸–¬∫Ø ˝
+        //Âæ™ÁéØÊõ¥Êñ∞ÂáΩÊï∞
         private Action<FrameAnimation> loopTypeFun;
-#if !DOTween
-        private ActionSequence timer;
-#endif
-
         public int nCurFrame { get; private set; }
         public bool isPlaying { get; private set; }
         public int nStartFrame { get; private set; }
@@ -87,26 +56,19 @@ namespace UnrealM
         public void Stop()
         {
             isPlaying = false;
-#if DOTween
-            DOTween.Kill(this);
-#else
-            if (timer != null)
-            {
-                timer.Stop();
-            }
-#endif
+            this.StopSequence();
         }
 
         public void Play()
         {
-            //Õ£÷πµ±«∞µƒ∂Øª≠
+            //ÂÅúÊ≠¢ÂΩìÂâçÁöÑÂä®Áîª
             Stop();
             if (nLength <= 0)
             {
                 return;
             }
 
-            //¥¶¿Ì≤•∑≈À≥–Ú
+            //Â§ÑÁêÜÊí≠ÊîæÈ°∫Â∫è
             if (playOrder == PlayOrder.Forward)
             {
                 nStartFrame = 0;
@@ -118,7 +80,7 @@ namespace UnrealM
                 nSign = -1;
             }
 
-            //¥¶¿Ì—≠ª∑ƒ£ Ω
+            //Â§ÑÁêÜÂæ™ÁéØÊ®°Âºè
             switch (loopType)
             {
                 case LoopType.Once:
@@ -134,17 +96,13 @@ namespace UnrealM
                     break;
             }
 
-            float interval = 1/FPS;
+            float interval = 1 / FPS;
             nCurFrame = nStartFrame;
             isPlaying = true;
 
-            //ø™∆Ù∂® ±∆˜
-            //’‚¿Ô π”√¡ÀActionSequenceSystem◊˜Œ™Timer£¨“≤ø…“‘ π”√DOTweenµƒSequence£¨µ±»ªƒ˙“≤ø…“‘ π”√ƒ˙µƒTimer
-#if DOTween
-            DOTween.Sequence().SetId(this).SetRecyclable().AppendInterval(interval).AppendCallback(UpdateFrame).SetLoops(-1);
-#else
-            timer = ActionSequenceSystem.Looper(interval, -1, false, UpdateFrame);
-#endif
+            //ÂºÄÂêØÂÆöÊó∂Âô®
+            //ËøôÈáå‰ΩøÁî®‰∫ÜActionSequenceSystem‰Ωú‰∏∫TimerÔºå‰πüÂèØ‰ª•‰ΩøÁî®DOTweenÁöÑSequenceÔºåÂΩìÁÑ∂ÊÇ®‰πüÂèØ‰ª•‰ΩøÁî®ÊÇ®ÁöÑTimer
+            this.Looper(interval, -1, false, UpdateFrame);
         }
 
         private void UpdateFrame()
@@ -158,9 +116,8 @@ namespace UnrealM
             loopTypeFun(this);
         }
 
-        #region —≠ª∑¿‡–Õµƒ≤ªÕ¨ µœ÷
-
-        // µœ÷—≠ª∑∏¸–¬
+        #region Âæ™ÁéØÁ±ªÂûãÁöÑ‰∏çÂêåÂÆûÁé∞
+        //ÂÆûÁé∞Âæ™ÁéØÊõ¥Êñ∞
         private static void UpdateFrameFuncLoop(FrameAnimation frameAnimation)
         {
             if (frameAnimation.nCurFrame >= frameAnimation.nLength || frameAnimation.nCurFrame < 0)
@@ -169,7 +126,7 @@ namespace UnrealM
             }
         }
 
-        // µœ÷µ•¥Œ∏¸–¬
+        //ÂÆûÁé∞ÂçïÊ¨°Êõ¥Êñ∞
         private static void UpdateFrameFuncOnce(FrameAnimation frameAnimation)
         {
             if (frameAnimation.nCurFrame >= frameAnimation.nLength || frameAnimation.nCurFrame < 0)
@@ -182,7 +139,7 @@ namespace UnrealM
             }
         }
 
-        // µœ÷¿¥ªÿ∏¸–¬
+        //ÂÆûÁé∞Êù•ÂõûÊõ¥Êñ∞
         private static void UpdateFrameFuncPingPong(FrameAnimation frameAnimation)
         {
             if (frameAnimation.nSign == 1)
